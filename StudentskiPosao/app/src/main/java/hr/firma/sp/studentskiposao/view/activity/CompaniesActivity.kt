@@ -2,6 +2,7 @@ package hr.firma.sp.studentskiposao.view.activity
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import hr.firma.sp.studentskiposao.R
 
 class CompaniesActivity : AppCompatActivity() {
 

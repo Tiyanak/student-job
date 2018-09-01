@@ -1,7 +1,7 @@
 package hr.firma.sp.studentskiposao.view.activity
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.GridLayoutManager
 import hr.firma.sp.studentskiposao.R
@@ -38,7 +38,7 @@ class JobsActivity : AppCompatActivity() {
         val gridManager = GridLayoutManager(this, 2)
 
         jobs_rv.layoutManager = gridManager
-        jobs_rv.addItemDecoration(GridSpacingItemDecoration(2, dpToPx(6), true))
+//        jobs_rv.addItemDecoration(GridSpacingItemDecoration(2, dpToPx(6), true))
         jobs_rv.itemAnimator = DefaultItemAnimator()
         jobs_rv.adapter = jobsAdapter
     }
@@ -54,15 +54,16 @@ class JobsActivity : AppCompatActivity() {
 
         for (i in 0..100) {
 
+            val companyId = r.nextInt(3)
             val job = JobData(
                 i.toLong(),
                 jobTitles.get(r.nextInt(3)),
                 jobDescs.get(r.nextInt(3)),
-                jobImgs.get(r.nextInt(3)),
+                jobImgs.get(companyId),
                 "Kn/h",
                 prices.get(r.nextInt(3)),
                 locations.get(r.nextInt(3)),
-                companies.get(r.nextInt(3)),
+                companies.get(companyId),
                 categories.get(r.nextInt(3)),
                 datesTo.get(r.nextInt(3))
             )
@@ -77,7 +78,7 @@ class JobsActivity : AppCompatActivity() {
 
     val jobTitles = arrayListOf("Pakiranje sladoleda", "Rad u trgovini", "Blagajnik")
     val jobDescs = arrayListOf("Pakiranje sladoleda u kutije.", "Slaganje polica, skladištenje robe.",
-            "Rad na blagajni.")
+            "Rad na blagajni i usluživanje kupaca.")
     val jobImgs = arrayListOf(R.drawable.ledo, R.drawable.konzum, R.drawable.polleo)
     val prices = arrayListOf(30.toDouble(), 25.toDouble(), 20.toDouble())
     val locations = arrayListOf("Zagreb, Savica", "Split, Savica", "Zagreb, Dubrava")

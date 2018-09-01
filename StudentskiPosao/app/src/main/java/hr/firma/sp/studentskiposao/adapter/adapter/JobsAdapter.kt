@@ -78,6 +78,7 @@ class JobsAdapter(val context: Context) : RecyclerView.Adapter<JobViewHolder>() 
         intent.putExtra("dateTo", job.dateTo)
         intent.putExtra("price", job.price)
         intent.putExtra("workTime", job.workTime)
+        intent.putExtra("location", job.location)
 
         return intent
     }
