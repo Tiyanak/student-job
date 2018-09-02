@@ -13,7 +13,7 @@ import hr.firma.sp.studentskiposao.view.activity.JobApplyActivity
 
 class JobsAdapter(val context: Context) : RecyclerView.Adapter<JobViewHolder>() {
 
-    private val jobs: MutableList<JobData> = ArrayList()
+    private var jobs: MutableList<JobData> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.job_card, parent, false)
@@ -41,19 +41,9 @@ class JobsAdapter(val context: Context) : RecyclerView.Adapter<JobViewHolder>() 
 
     }
 
-    fun addAndNotify(job: JobData) {
-        jobs.add(job)
-        notifyItemInserted(jobs.size - 1)
-    }
-
-    fun add(job: JobData) {
-        jobs.add(job)
-    }
-
-    fun setItems(jobs: MutableList<JobData>) {
-        jobs.clear()
-        jobs.addAll(jobs)
-        notifyDataSetChanged()
+    fun setItems(inJobs: MutableList<JobData>) {
+        jobs = inJobs
+        this.notifyDataSetChanged()
     }
 
     fun setJobCardListener(job: JobData, holder: JobViewHolder) {
@@ -81,6 +71,10 @@ class JobsAdapter(val context: Context) : RecyclerView.Adapter<JobViewHolder>() 
         intent.putExtra("location", job.location)
 
         return intent
+    }
+
+    fun getItems() : MutableList<JobData> {
+        return jobs
     }
 
 }

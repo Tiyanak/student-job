@@ -12,18 +12,24 @@
         <activity
             android:name=".view.activity.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".view.activity.JobsActivity"
-            android:screenOrientation="portrait" />
-        <activity android:name=".view.activity.JobApplyActivity" />
-        <activity android:name=".view.activity.CompaniesActivity"></activity>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".view.activity.JobApplyActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".view.activity.CompaniesActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>

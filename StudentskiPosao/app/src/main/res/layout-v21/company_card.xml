@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/company_card"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/card_margin"
+        android:elevation="3dp"
+        app:cardCornerRadius="@dimen/card_job_radius"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/company_iv"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="fitXY"
+                android:src="@mipmap/student_job_launcher"/>
+
+            <TextView
+                android:id="@+id/company_name_tv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Company"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:layout_marginLeft="16dp"
+                android:gravity="center_vertical"/>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</android.support.constraint.ConstraintLayout>
