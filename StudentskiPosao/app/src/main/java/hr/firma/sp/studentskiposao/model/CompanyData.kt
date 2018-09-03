@@ -20,4 +20,16 @@ data class CompanyData(
         return compared
     }
 
+    override fun getValueForField(fieldName: String): String {
+        var value = ""
+        when(fieldName) {
+            "id" -> value = id.toString()
+            "name" -> value = name
+            "description" -> value = description
+            else -> value = ""
+        }
+
+        return value
+    }
+
 }

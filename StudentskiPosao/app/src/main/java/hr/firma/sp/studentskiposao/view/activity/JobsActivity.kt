@@ -7,8 +7,10 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.SearchView
 import android.util.TypedValue
+import android.widget.Toast
 import hr.firma.sp.studentskiposao.R
 import hr.firma.sp.studentskiposao.adapter.adapter.JobsAdapter
+import hr.firma.sp.studentskiposao.algorithm.RedBlackBST.RedBlackBST
 import hr.firma.sp.studentskiposao.algorithm.Search
 import hr.firma.sp.studentskiposao.algorithm.Sort
 import hr.firma.sp.studentskiposao.model.AbstractData
@@ -18,13 +20,16 @@ import kotlinx.android.synthetic.main.content_jobs.*
 import java.util.*
 import kotlin.collections.ArrayList
 
-
 class JobsActivity : AppCompatActivity() {
 
     private lateinit var jobsAdapter: JobsAdapter
     private var jobs: MutableList<AbstractData> = ArrayList()
     private val searchAlgorithm: Search = Search()
     private val sortAlgorithm: Sort = Sort()
+    private var treeJobs: MutableMap<String, MutableList<Int>> = HashMap()
+    private var redBlackBST: RedBlackBST<String, MutableList<Int>> = RedBlackBST()
+    private var searchField: String = "price"
+    private var searchAlgorithmPicked: String = SearchAlgorithms.REDBLACKBST
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +43,28 @@ class JobsActivity : AppCompatActivity() {
         initJobsRecyclerView()
         initSearch()
         initCompanyLogo()
+        initRedBlackBST()
+    }
+
+    fun initRedBlackBST() {
+
+        treeJobs.clear()
+        redBlackBST = RedBlackBST()
+
+        for (jobIndex in 0..(jobs.size - 1)) {
+            var j = jobs.get(jobIndex)
+
+            if (treeJobs.get(j.getValueForField(searchField)) != null) {
+                treeJobs.get(j.getValueForField(searchField))?.add(jobIndex)
+            } else {
+                treeJobs.put(j.getValueForField(searchField), arrayListOf(jobIndex))
+            }
+        }
+
+        for ((key, value) in treeJobs) {
+            redBlackBST.put(key, value)
+        }
+
     }
 
     private fun initCompanyLogo() {
@@ -73,10 +100,24 @@ class JobsActivity : AppCompatActivity() {
     }
 
     fun filterJobs(query: String?) {
+        var start = Date().time
         query?.let {
-            var jobs = searchAlgorithm.searchJobs(jobs, query)
-            sortAlgorithm.quickSort(jobs, "price")
-            jobsAdapter.setItems(jobs.map { it as JobData }.toMutableList())
+            var filJobs: MutableList<AbstractData> = ArrayList()
+            if (searchAlgorithmPicked == SearchAlgorithms.REDBLACKBST) {
+                var jobIndexes: MutableList<Int>? = redBlackBST.get(query)
+                if (jobIndexes != null) {
+                    for (item in jobIndexes) {
+                        filJobs.add(jobs.get(item))
+                    }
+                }
+            } else {
+                filJobs.addAll(searchAlgorithm.searchCompanies(jobs, query))
+            }
+            Toast.makeText(this, "Searched in " + ((Date().time - start) / 1000F) + " seconds", Toast.LENGTH_LONG).show()
+            start = Date().time
+            sortAlgorithm.quickSort(filJobs, "price")
+            Toast.makeText(this, "Sorted in " + ((Date().time - start) / 1000F) + " seconds", Toast.LENGTH_LONG).show()
+            jobsAdapter.setItems(filJobs.map { it as JobData }.toMutableList())
         }
     }
 
@@ -104,7 +145,7 @@ class JobsActivity : AppCompatActivity() {
         val genJobs: MutableList<AbstractData> = ArrayList()
         val r = Random()
 
-        for (i in 0..99) {
+        for (i in 0..1000000) {
             val companyId = r.nextInt(3)
             genJobs.add(JobData(
                 i.toLong(),

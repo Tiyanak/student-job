@@ -11,11 +11,11 @@ class Search {
 
         var searchedItems: MutableList<AbstractData> = items.filter {
             search((it as JobData).category, query) or
-            search((it as JobData).company, query) or
-            search((it as JobData).description, query) or
-            search((it as JobData).location, query) or
-            search((it as JobData).title, query) or
-            search((it as JobData).price.toString(), query)
+            search(it.company, query) or
+            search(it.description, query) or
+            search(it.location, query) or
+            search(it.title, query) or
+            search(it.price.toString(), query)
         }.toMutableList()
 
         return searchedItems

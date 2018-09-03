@@ -35,4 +35,21 @@ data class JobData(
         return compared
     }
 
+    override fun getValueForField(fieldName: String): String {
+        var value = ""
+        when(fieldName) {
+            "id" -> value = id.toString()
+            "title" -> value = title
+            "description" -> value = description
+            "price" -> value = price.toString()
+            "location" -> value = location
+            "company" -> value = company
+            "category" -> value = category
+            "dateTo" -> value = dateTo
+            else -> value = ""
+        }
+
+        return value
+    }
+
 }

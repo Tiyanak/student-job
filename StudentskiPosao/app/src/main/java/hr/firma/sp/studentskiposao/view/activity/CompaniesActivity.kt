@@ -7,6 +7,7 @@ import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.SearchView
 import hr.firma.sp.studentskiposao.R
 import hr.firma.sp.studentskiposao.adapter.adapter.CompanyAdapter
+import hr.firma.sp.studentskiposao.algorithm.RedBlackBST.RedBlackBST
 import hr.firma.sp.studentskiposao.algorithm.Search
 import hr.firma.sp.studentskiposao.algorithm.Sort
 import hr.firma.sp.studentskiposao.model.AbstractData
@@ -14,12 +15,21 @@ import hr.firma.sp.studentskiposao.model.CompanyData
 import kotlinx.android.synthetic.main.activity_companies.*
 import kotlinx.android.synthetic.main.content_companies.*
 
+object SearchAlgorithms {
+    val REDBLACKBST = "redblackbst"
+    val SEQ = "seq"
+}
+
 class CompaniesActivity : AppCompatActivity() {
 
     private lateinit var companyAdapter: CompanyAdapter
     private var companies: MutableList<AbstractData> = ArrayList()
     private val searchAlgorithm: Search = Search()
     private val sortAlgorithm: Sort = Sort()
+    private var treeCompanies: MutableMap<String, MutableList<Int>> = HashMap()
+    private var redBlackBST: RedBlackBST<String, MutableList<Int>> = RedBlackBST()
+    private var searchField: String = "name"
+    private var searchAlgorithmPicked: String = SearchAlgorithms.REDBLACKBST
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +42,28 @@ class CompaniesActivity : AppCompatActivity() {
     private fun initActivity() {
         initCompaniesRecyclerView()
         initSearch()
+        initRedBlackBST()
+    }
+
+    fun initRedBlackBST() {
+
+        treeCompanies.clear()
+        redBlackBST = RedBlackBST()
+
+        for (companyIndex in 0..(companies.size - 1)) {
+            var c = companies.get(companyIndex)
+
+            if (treeCompanies.get(c.getValueForField(searchField)) != null) {
+                treeCompanies.get(c.getValueForField(searchField))?.add(companyIndex)
+            } else {
+                treeCompanies.put(c.getValueForField(searchField), arrayListOf(companyIndex))
+            }
+        }
+
+        for ((key, value) in treeCompanies) {
+            redBlackBST.put(key, value)
+        }
+
     }
 
     private fun initSearch() {
@@ -77,9 +109,19 @@ class CompaniesActivity : AppCompatActivity() {
 
     fun filterJobs(query: String?) {
         query?.let {
-            var jobs = searchAlgorithm.searchCompanies(companies, query)
-            sortAlgorithm.quickSort(jobs, "name")
-            companyAdapter.setItems(jobs.map { it as CompanyData }.toMutableList())
+            var filCompanies: MutableList<AbstractData> = ArrayList()
+            if (searchAlgorithmPicked == SearchAlgorithms.REDBLACKBST) {
+                var companyIndexes: MutableList<Int>? = redBlackBST.get(query)
+                if (companyIndexes != null) {
+                    for (item in companyIndexes) {
+                        filCompanies.add(companies.get(item))
+                    }
+                }
+            } else {
+                filCompanies.addAll(searchAlgorithm.searchCompanies(companies, query))
+            }
+            sortAlgorithm.quickSort(filCompanies, "name")
+            companyAdapter.setItems(filCompanies.map { it as CompanyData }.toMutableList())
         }
     }
 
