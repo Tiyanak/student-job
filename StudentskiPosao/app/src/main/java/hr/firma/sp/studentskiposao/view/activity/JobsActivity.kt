@@ -2,11 +2,17 @@ package hr.firma.sp.studentskiposao.view.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.SearchView
-import android.util.TypedValue
+import android.view.Gravity
+import android.view.View
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import hr.firma.sp.studentskiposao.R
 import hr.firma.sp.studentskiposao.adapter.adapter.JobsAdapter
@@ -17,6 +23,8 @@ import hr.firma.sp.studentskiposao.model.AbstractData
 import hr.firma.sp.studentskiposao.model.JobData
 import kotlinx.android.synthetic.main.activity_jobs.*
 import kotlinx.android.synthetic.main.content_jobs.*
+import kotlinx.android.synthetic.main.nav_header_jobs.*
+import kotlinx.android.synthetic.main.nav_header_jobs.view.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -29,7 +37,10 @@ class JobsActivity : AppCompatActivity() {
     private var treeJobs: MutableMap<String, MutableList<Int>> = HashMap()
     private var redBlackBST: RedBlackBST<String, MutableList<Int>> = RedBlackBST()
     private var searchField: String = "price"
+    private var sortField: String = "name"
     private var searchAlgorithmPicked: String = SearchAlgorithms.REDBLACKBST
+    private lateinit var jobsSearchAdapter: ArrayAdapter<CharSequence>
+    private lateinit var jobsSortAdapter: ArrayAdapter<CharSequence>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +55,83 @@ class JobsActivity : AppCompatActivity() {
         initSearch()
         initCompanyLogo()
         initRedBlackBST()
+        initDrawer()
+    }
+
+    fun initFilterButton() {
+        nav_view.getHeaderView(0)?.filter_jobs?.setOnClickListener {
+            drawer_jobs.closeDrawers()
+            initRedBlackBST()
+            var filJobs: MutableList<AbstractData> = ArrayList()
+            filJobs.addAll(jobs)
+            sortAlgorithm.quickSort(filJobs, sortField)
+            jobsAdapter.setItems(filJobs.map { it as JobData }.toMutableList())
+        }
+    }
+
+    fun initSpinner() {
+
+        jobsSearchAdapter = ArrayAdapter.createFromResource(this, R.array.job_fields, android.R.layout.simple_spinner_item)
+        jobsSearchAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        var isl = object : OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                searchField = jobsSearchAdapter.getItem(p2).toString()
+                println("search field " + searchField)
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+        if (search_field_spinner == null) {
+            nav_view.getHeaderView(0).search_field_spinner?.adapter = jobsSearchAdapter
+            nav_view.getHeaderView(0).search_field_spinner.onItemSelectedListener = isl
+        } else {
+            search_field_spinner?.adapter = jobsSearchAdapter
+            search_field_spinner?.onItemSelectedListener = isl
+        }
+
+        jobsSortAdapter = ArrayAdapter.createFromResource(this, R.array.job_fields, android.R.layout.simple_spinner_item)
+        jobsSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        var islSort = object : OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                sortField = jobsSortAdapter.getItem(p2).toString()
+                println("search field " + sortField)
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+        if (sort_field_spinner == null) {
+            nav_view.getHeaderView(0).sort_field_spinner?.adapter = jobsSortAdapter
+            nav_view.getHeaderView(0).sort_field_spinner?.onItemSelectedListener = islSort
+        } else {
+            sort_field_spinner?.adapter = jobsSortAdapter
+            sort_field_spinner?.onItemSelectedListener = islSort
+        }
+
+    }
+
+    fun initFilterOptions() {
+        initSpinner()
+        initFilterButton()
+    }
+
+    fun initDrawer() {
+        val toggle = ActionBarDrawerToggle(this, drawer_jobs, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        toggle.isDrawerIndicatorEnabled = false
+        toggle.setHomeAsUpIndicator(R.drawable.ic_filter_list_black_24dp)
+        toolbar.setNavigationOnClickListener {
+            drawer_jobs.openDrawer(Gravity.START)
+        }
+        drawer_jobs.addDrawerListener(toggle)
+        toggle.syncState()
+
+        initFilterOptions()
+
+    }
+
+    override fun onBackPressed() {
+        if (drawer_jobs.isDrawerOpen(GravityCompat.START)) {
+            drawer_jobs.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
     }
 
     fun initRedBlackBST() {
@@ -100,7 +188,6 @@ class JobsActivity : AppCompatActivity() {
     }
 
     fun filterJobs(query: String?) {
-        var start = Date().time
         query?.let {
             var filJobs: MutableList<AbstractData> = ArrayList()
             if (searchAlgorithmPicked == SearchAlgorithms.REDBLACKBST) {
@@ -113,10 +200,7 @@ class JobsActivity : AppCompatActivity() {
             } else {
                 filJobs.addAll(searchAlgorithm.searchCompanies(jobs, query))
             }
-            Toast.makeText(this, "Searched in " + ((Date().time - start) / 1000F) + " seconds", Toast.LENGTH_LONG).show()
-            start = Date().time
-            sortAlgorithm.quickSort(filJobs, "price")
-            Toast.makeText(this, "Sorted in " + ((Date().time - start) / 1000F) + " seconds", Toast.LENGTH_LONG).show()
+            sortAlgorithm.quickSort(filJobs, sortField)
             jobsAdapter.setItems(filJobs.map { it as JobData }.toMutableList())
         }
     }
@@ -135,17 +219,12 @@ class JobsActivity : AppCompatActivity() {
         jobsAdapter.setItems(jobs.map { it as JobData }.toMutableList())
     }
 
-    private fun dpToPx(dp: Int): Int {
-        val r = resources
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), r.displayMetrics))
-    }
-
     private fun generateJobs() : MutableList<AbstractData> {
 
         val genJobs: MutableList<AbstractData> = ArrayList()
         val r = Random()
 
-        for (i in 0..1000000) {
+        for (i in 0..10000) {
             val companyId = r.nextInt(3)
             genJobs.add(JobData(
                 i.toLong(),
@@ -153,7 +232,7 @@ class JobsActivity : AppCompatActivity() {
                 jobDescs.get(r.nextInt(3)),
                 jobImgs.get(companyId),
                 "Kn/h",
-                prices.get(r.nextInt(3)),
+                prices.get(r.nextInt(6)).toDouble(),
                 locations.get(r.nextInt(3)),
                 companies.get(companyId),
                 categories.get(r.nextInt(3)),
@@ -168,7 +247,7 @@ class JobsActivity : AppCompatActivity() {
     val jobDescs = arrayListOf("Pakiranje sladoleda u kutije.", "Slaganje polica, skladištenje robe.",
             "Rad na blagajni i usluživanje kupaca.")
     val jobImgs = arrayListOf(R.drawable.ledo, R.drawable.konzum, R.drawable.polleo)
-    val prices = arrayListOf(30.toDouble(), 25.toDouble(), 20.toDouble())
+    val prices = IntProgression.fromClosedRange(20, 25, 1).toList()
     val locations = arrayListOf("Zagreb, Savica", "Split, Savica", "Zagreb, Dubrava")
     val companies = arrayListOf("Ledo", "Konzum", "Polleo")
     val categories = arrayListOf("Skladište", "Trgovina", "Financije")

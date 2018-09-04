@@ -1,11 +1,18 @@
 package hr.firma.sp.studentskiposao.view.activity
 
 import android.os.Bundle
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.SearchView
+import android.view.Gravity
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import hr.firma.sp.studentskiposao.R
+import hr.firma.sp.studentskiposao.R.id.search_field_spinner
 import hr.firma.sp.studentskiposao.adapter.adapter.CompanyAdapter
 import hr.firma.sp.studentskiposao.algorithm.RedBlackBST.RedBlackBST
 import hr.firma.sp.studentskiposao.algorithm.Search
@@ -14,6 +21,8 @@ import hr.firma.sp.studentskiposao.model.AbstractData
 import hr.firma.sp.studentskiposao.model.CompanyData
 import kotlinx.android.synthetic.main.activity_companies.*
 import kotlinx.android.synthetic.main.content_companies.*
+import kotlinx.android.synthetic.main.nav_header_companies.*
+import kotlinx.android.synthetic.main.nav_header_companies.view.*
 
 object SearchAlgorithms {
     val REDBLACKBST = "redblackbst"
@@ -29,7 +38,10 @@ class CompaniesActivity : AppCompatActivity() {
     private var treeCompanies: MutableMap<String, MutableList<Int>> = HashMap()
     private var redBlackBST: RedBlackBST<String, MutableList<Int>> = RedBlackBST()
     private var searchField: String = "name"
+    private var sortField: String = "name"
     private var searchAlgorithmPicked: String = SearchAlgorithms.REDBLACKBST
+    private lateinit var companiesSearchAdapter: ArrayAdapter<CharSequence>
+    private lateinit var companiesSortAdapter: ArrayAdapter<CharSequence>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +55,83 @@ class CompaniesActivity : AppCompatActivity() {
         initCompaniesRecyclerView()
         initSearch()
         initRedBlackBST()
+        initDrawer()
+    }
+
+    fun initSpinner() {
+
+        companiesSearchAdapter = ArrayAdapter.createFromResource(this, R.array.company_fields, android.R.layout.simple_spinner_item)
+        companiesSearchAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        var isl = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                searchField = companiesSearchAdapter.getItem(p2).toString()
+                println("search field " + searchField)
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+        if (search_field_spinner == null) {
+            nav_view.getHeaderView(0).search_field_spinner?.adapter = companiesSearchAdapter
+            nav_view.getHeaderView(0).search_field_spinner.onItemSelectedListener = isl
+        } else {
+            search_field_spinner?.adapter = companiesSearchAdapter
+            search_field_spinner?.onItemSelectedListener = isl
+        }
+
+        companiesSortAdapter = ArrayAdapter.createFromResource(this, R.array.company_fields, android.R.layout.simple_spinner_item)
+        companiesSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        var islSort = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                sortField = companiesSortAdapter.getItem(p2).toString()
+                println("search field " + sortField)
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+        if (sort_field_spinner == null) {
+            nav_view.getHeaderView(0).sort_field_spinner?.adapter = companiesSortAdapter
+            nav_view.getHeaderView(0).sort_field_spinner?.onItemSelectedListener = islSort
+        } else {
+            sort_field_spinner?.adapter = companiesSortAdapter
+            sort_field_spinner?.onItemSelectedListener = islSort
+        }
+
+    }
+
+    fun initFilterButton() {
+        nav_view.getHeaderView(0)?.filter_companies?.setOnClickListener {
+            drawer_companies.closeDrawers()
+            initRedBlackBST()
+            var filCompanies: MutableList<AbstractData> = ArrayList()
+            filCompanies.addAll(companies)
+            sortAlgorithm.quickSort(filCompanies, sortField)
+            companyAdapter.setItems(filCompanies.map { it as CompanyData }.toMutableList())
+        }
+    }
+
+    fun initFilterOptions() {
+        initSpinner()
+        initFilterButton()
+    }
+
+    fun initDrawer() {
+        val toggle = ActionBarDrawerToggle(this, drawer_companies, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        toggle.isDrawerIndicatorEnabled = false
+        toggle.setHomeAsUpIndicator(R.drawable.ic_filter_list_black_24dp)
+        toolbar.setNavigationOnClickListener {
+            drawer_companies.openDrawer(Gravity.START)
+        }
+        drawer_companies.addDrawerListener(toggle)
+        toggle.syncState()
+
+        initFilterOptions()
+
+    }
+
+    override fun onBackPressed() {
+        if (drawer_companies.isDrawerOpen(GravityCompat.START)) {
+            drawer_companies.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
     }
 
     fun initRedBlackBST() {
@@ -120,7 +209,7 @@ class CompaniesActivity : AppCompatActivity() {
             } else {
                 filCompanies.addAll(searchAlgorithm.searchCompanies(companies, query))
             }
-            sortAlgorithm.quickSort(filCompanies, "name")
+            sortAlgorithm.quickSort(filCompanies, sortField)
             companyAdapter.setItems(filCompanies.map { it as CompanyData }.toMutableList())
         }
     }

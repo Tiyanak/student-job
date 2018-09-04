@@ -1,4 +1,22 @@
 <resources>
     <string name="app_name">Studentski Posao</string>
     <string name="login_desc_text">Bok!\\nPronađi posao koji odgovara tvojim zahtjevima!\\nPrijavi se ili registriraj</string>
+    <string name="navigation_drawer_open">Open</string>
+    <string name="navigation_drawer_close">Close</string>
+    
+    <string-array name="job_fields">
+        <item>price</item>
+        <item>title</item>
+        <item>description</item>
+        <item>location</item>
+        <item>company</item>
+        <item>category</item>
+        <item>dateTo</item>
+    </string-array>
+
+    <string-array name="company_fields">
+        <item>name</item>
+        <item>description</item>
+    </string-array>
+
 </resources>
