@@ -44,6 +44,8 @@ class JobApplyActivity : AppCompatActivity() {
         date_to_tv.text = job.dateTo
         job_price_tv.text = job.price.toString()
         job_time_work_tv.text = job.workTime
+        category_tv.text = job.category
+        location_tv.text = job.location
         Glide.with(this).load(job.image).into(job_iv)
     }
 

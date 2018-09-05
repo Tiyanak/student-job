@@ -12,11 +12,9 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import hr.firma.sp.studentskiposao.R
-import hr.firma.sp.studentskiposao.R.id.search_field_spinner
 import hr.firma.sp.studentskiposao.adapter.adapter.CompanyAdapter
-import hr.firma.sp.studentskiposao.algorithm.RedBlackBST.RedBlackBST
-import hr.firma.sp.studentskiposao.algorithm.Search
-import hr.firma.sp.studentskiposao.algorithm.Sort
+import hr.firma.sp.studentskiposao.algorithm.QuickSort
+import hr.firma.sp.studentskiposao.algorithm.RedBlackBST
 import hr.firma.sp.studentskiposao.model.AbstractData
 import hr.firma.sp.studentskiposao.model.CompanyData
 import kotlinx.android.synthetic.main.activity_companies.*
@@ -33,8 +31,6 @@ class CompaniesActivity : AppCompatActivity() {
 
     private lateinit var companyAdapter: CompanyAdapter
     private var companies: MutableList<AbstractData> = ArrayList()
-    private val searchAlgorithm: Search = Search()
-    private val sortAlgorithm: Sort = Sort()
     private var treeCompanies: MutableMap<String, MutableList<Int>> = HashMap()
     private var redBlackBST: RedBlackBST<String, MutableList<Int>> = RedBlackBST()
     private var searchField: String = "name"
@@ -102,7 +98,7 @@ class CompaniesActivity : AppCompatActivity() {
             initRedBlackBST()
             var filCompanies: MutableList<AbstractData> = ArrayList()
             filCompanies.addAll(companies)
-            sortAlgorithm.quickSort(filCompanies, sortField)
+            QuickSort.sort(filCompanies, sortField)
             companyAdapter.setItems(filCompanies.map { it as CompanyData }.toMutableList())
         }
     }
@@ -197,19 +193,19 @@ class CompaniesActivity : AppCompatActivity() {
     }
 
     fun filterJobs(query: String?) {
+
+        if (query == null || query.isEmpty()) companyAdapter.setItems(companies.map { it as CompanyData }.toMutableList())
+
         query?.let {
             var filCompanies: MutableList<AbstractData> = ArrayList()
-            if (searchAlgorithmPicked == SearchAlgorithms.REDBLACKBST) {
-                var companyIndexes: MutableList<Int>? = redBlackBST.get(query)
-                if (companyIndexes != null) {
-                    for (item in companyIndexes) {
-                        filCompanies.add(companies.get(item))
-                    }
+
+            var companyIndexes: MutableList<Int>? = redBlackBST.get(query)
+            if (companyIndexes != null) {
+                for (item in companyIndexes) {
+                    filCompanies.add(companies.get(item))
                 }
-            } else {
-                filCompanies.addAll(searchAlgorithm.searchCompanies(companies, query))
             }
-            sortAlgorithm.quickSort(filCompanies, sortField)
+            QuickSort.sort(filCompanies, sortField)
             companyAdapter.setItems(filCompanies.map { it as CompanyData }.toMutableList())
         }
     }
